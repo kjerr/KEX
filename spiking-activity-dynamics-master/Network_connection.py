@@ -27,15 +27,19 @@ nest.CopyModel("static_synapse", "syn_inh", syn_param_inh)
 nodes_ex = nest.Create('iaf_cond_exp', npopE, neuron_params)
 nodes_in = nest.Create('iaf_cond_exp', npopI, neuron_params)
 
+# Create one spike detector per neuron
+sd = nest.Create('spike_detector', npopE + npopI)
+
 # Create poisson generator
 poiE = nest.Create('poisson_generator', 1, {'rate': rate})
+
+
 
 # Connect poisson noise to all neurons
 nest.Connect(poiE, nodes_ex, syn_spec={'model': 'syn_exc'})
 nest.Connect(poiE, nodes_in, syn_spec={'model': 'syn_exc'})
 
-# Create one spike detector per neuron
-sd = nest.Create('spike_detector', npopE + npopI)
+
 
 #--------------------------------------------------------------------------------------------------------------------
 # Input from {Insert Max code} is on the form [conmatEE, conmatEI, conmatIE, conmatII]
@@ -44,7 +48,7 @@ sd = nest.Create('spike_detector', npopE + npopI)
 # (that is, npop arrays in an array)
 
 
-with open("connections", 'rb') as f:
+with open("connections.p", 'rb') as f:
     targets = pickle.load(f)
 
 targetsEE = targets[0]
@@ -57,16 +61,21 @@ for n in range(npopE):
     neuron = (n+1,)
     nest.Connect(neuron, targetsEE[n], syn_spec={'model': 'syn_exc'})  # Add 1 to shift indices
     nest.Connect(neuron, targetsEI[n], syn_spec={'model': 'syn_exc'})  # Add npopE to shift targets to inhibitory neurons
-    # nest.Connect(sd[n:n+1], )
+    nest.Connect(sd[n:n+1], neuron)
 
 # Make IE and II connections
 for n in range(npopI):
     neuron = (n + 1 + npopE,)
     nest.Connect(neuron, targetsIE[n], syn_spec={'model': 'syn_inh'})
     nest.Connect(neuron, targetsII[n], syn_spec={'model': 'syn_inh'})
+    nest.Connect(sd[n + npopE:n + npopE + 1], neuron)
 
 
 simtime = 1000
+
+nest.Simulate()
+
+nest.GetStatus(sd)
 
 
 
