@@ -40,13 +40,13 @@ def EI_networks(nrowE, ncolE, nrowI, ncolI, p, stdE, stdI, seed=0, **kwargs):
         targets, delay = lcrn.lcrn_skewed_gauss(*source)
         targets = targets[targets != idx]           # no selfconnections
         targets += 1
-        conmatEE.append(targets)
+        conmatEE.append(tuple(targets))
 
         # E-> I
         source = idx, nrowE, ncolE, nrowI, ncolI, int(p * npopI), stdI
         targets, delay = lcrn.lcrn_gauss_targets(*source)
         targets += (1 + npopE)
-        conmatEI.append(targets)
+        conmatEI.append(tuple(targets))
 
     conmatIE, conmatII = [], []
     for idx in range(npopI):
@@ -55,12 +55,12 @@ def EI_networks(nrowE, ncolE, nrowI, ncolI, p, stdE, stdI, seed=0, **kwargs):
         source = idx, nrowI, ncolI, nrowE, ncolE, int(p * npopE), stdE
         targets, delay = lcrn.lcrn_gauss_targets(*source)
         targets += 1
-        conmatIE.append(targets)
+        conmatIE.append(tuple(targets))
 
         # I-> I
         source = idx, nrowI, ncolI, nrowI, ncolI, int(p * npopI), stdI
         targets, delay = lcrn.lcrn_gauss_targets(*source)
         targets += (1 + npopE)
-        conmatII.append(targets)
+        conmatII.append(tuple(targets))
 
     return np.array(conmatEE), np.array(conmatEI), np.array(conmatIE), np.array(conmatII)
