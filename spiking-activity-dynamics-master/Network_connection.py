@@ -44,7 +44,7 @@ sd = nest.Create('spike_detector', npopE + npopI)
 # (that is, npop arrays in an array)
 
 
-with open("connections", 'rb') as f:
+with open("connections.p", 'rb') as f:
     targets = pickle.load(f)
 
 targetsEE = targets[0]
