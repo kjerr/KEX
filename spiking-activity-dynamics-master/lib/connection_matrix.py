@@ -42,6 +42,7 @@ def EI_networks(nrowE, ncolE, nrowI, ncolI, p, stdE, stdI, seed=0, **kwargs):
         targets += 1
         conmatEE.append(tuple(targets))
 
+
         # E-> I
         source = idx, nrowE, ncolE, nrowI, ncolI, int(p * npopI), stdI
         targets, delay = lcrn.lcrn_gauss_targets(*source)
@@ -63,4 +64,4 @@ def EI_networks(nrowE, ncolE, nrowI, ncolI, p, stdE, stdI, seed=0, **kwargs):
         targets += (1 + npopE)
         conmatII.append(tuple(targets))
 
-    return np.array(conmatEE), np.array(conmatEI), np.array(conmatIE), np.array(conmatII)
+    return  np.array(conmatEE), np.array(conmatEI), np.array(conmatIE), np.array(conmatII)

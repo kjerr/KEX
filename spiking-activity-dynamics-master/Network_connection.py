@@ -1,6 +1,8 @@
 import nest
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
+
 nest.ResetKernel()
 
 nrowE, ncolE = 12, 12      # Must be square and same as [Insert Max code]
@@ -44,7 +46,6 @@ nest.Connect(poiE, nodes_ex, syn_spec={'model': 'syn_exc'})
 nest.Connect(poiE, nodes_in, syn_spec={'model': 'syn_exc'})
 
 
-
 # Create one spike detector per neuron
 sd = nest.Create('spike_detector', npopE + npopI)
 
@@ -64,33 +65,40 @@ targetsEI = targets[1]
 targetsIE = targets[2]
 targetsII = targets[3]
 
+
+# Connect one spike detector to each node.
+nest.Connect(nodes_ex + nodes_in, sd, 'one_to_one')
+
 # Make EE and EI connections
 for n in range(npopE):
     neuron = (n+1,)
-    nest.Connect(neuron, targetsEE[n], syn_spec={'model': 'syn_exc'})  # Add 1 to shift indices
-    nest.Connect(neuron, targetsEI[n], syn_spec={'model': 'syn_exc'})  # Add npopE to shift targets to inhibitory neurons
-
-    nest.Connect(sd[n:n+1], neuron)
-
-    # nest.Connect(sd[n:n+1], )
+    nest.Connect(neuron, targetsEE[n], syn_spec={'model': 'syn_exc'})
+    nest.Connect(neuron, tuple(targetsEI[n]), syn_spec={'model': 'syn_exc'})
 
 
 # Make IE and II connections
 for n in range(npopI):
     neuron = (n + 1 + npopE,)
-    nest.Connect(neuron, targetsIE[n], syn_spec={'model': 'syn_inh'})
-    nest.Connect(neuron, targetsII[n], syn_spec={'model': 'syn_inh'})
-
-    nest.Connect(sd[n + npopE:n + npopE + 1], neuron)
+    nest.Connect(neuron, tuple(targetsIE[n]), syn_spec={'model': 'syn_inh'})
+    nest.Connect(neuron, tuple(targetsII[n]), syn_spec={'model': 'syn_inh'})
 
 
 
 simtime = 1000
 
 
-nest.Simulate()
+nest.Simulate(simtime)
+# print(sd)
+print(nest.GetStatus(sd)[0]['events']['times'])
 
-nest.GetStatus(sd)
+
+# spikesMatrixE = [[0 for x in range(ncolE)] for y in range(nrowE)]
+# for n in range(npopE):
+#     spikesMatrixE[np.remainder(n, ncolE)][int(n) / int(nrowE)] = len(nest.GetStatus(sd)[n]['events']['times'])
+#
+# plt.pcolormesh(spikesMatrixE)
+# plt.colorbar()
+# plt.show()
 
 
 
