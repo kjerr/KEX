@@ -14,14 +14,18 @@ nrowI, ncolI = 6, 6
 npopE =  nrowE * ncolE
 npopI = nrowI * ncolI
 
+# Simulation time
+simtime = 1000
+
 # Rate of Poisson generator
-rate = 5000.
+rate = 6000.
 
 # Parameters of neurons.
 neuron_params = {'V_th': -54., 'V_reset': -70., 't_ref': 2., 'g_L': 12.5, 'C_m': 250.0, 'E_ex': 0.0,
                          'E_in': -80.0,
                          'tau_syn_ex': 0.3, 'tau_syn_in': 1.0, 'E_L': -70.}
 
+# Synapse parameters
 syn_param_exc = {'weight': 2., 'delay': 1.0}
 syn_param_inh = {'weight': -2., 'delay': 1.0}
 
@@ -33,6 +37,7 @@ nest.CopyModel("static_synapse", "syn_inh", syn_param_inh)
 nodes_ex = nest.Create('iaf_cond_exp', npopE, neuron_params)  # Will have ID's 1 to npopE
 nodes_in = nest.Create('iaf_cond_exp', npopI, neuron_params)  # Will have ID's from npopE+1 to npopE+npopI
 
+
 # Create one spike detector per neuron
 sd = nest.Create('spike_detector', npopE + npopI) # Will have ID's from npopE+npopI+1 to 2*(npopE+npopI)
 
@@ -43,6 +48,15 @@ poiE = nest.Create('poisson_generator', 1, {'rate': rate})  # Will have ID 2*(np
 # Connect poisson noise to all neurons
 nest.Connect(poiE, nodes_ex, syn_spec={'model': 'syn_exc'})
 nest.Connect(poiE, nodes_in, syn_spec={'model': 'syn_exc'})
+
+# # Check that ID's are correct
+# print(nodes_ex)
+# print(npopE)
+# print(nodes_in)
+# print(npopE+1)
+# print(sd)
+# print(poiE)
+# print(2*(npopE+npopI)+1)
 
 
 #--------------------------------------------------------------------------------------------------------------------
@@ -79,19 +93,18 @@ for n in range(npopI):
     nest.Connect(neuron, tuple(targetsII[n]), syn_spec={'model': 'syn_inh'})
 
 
-
-simtime = 1000
-
-
+#----------------------------------------------------------------------------
+# Start simulation
 nest.Simulate(simtime)
-# print(sd)
-# print(nest.GetStatus(sd)[0]['events']['times'])
 
+# Create matrix counting how many times each neuron spikes
+spikesMatrixE = [[0 for x in range(ncolE)] for y in range(nrowE)]
+for n in range(npopE):
+    spikesMatrixE[np.remainder(n, ncolE)][int(n) / int(nrowE)] = len(nest.GetStatus(sd)[n]['events']['times'])
 
-# spikesMatrixE = [[0 for x in range(ncolE)] for y in range(nrowE)]
-# for n in range(npopE):
-#     spikesMatrixE[np.remainder(n, ncolE)][int(n) / int(nrowE)] = len(nest.GetStatus(sd)[n]['events']['times'])
-#
+# Save the matrix as a file for plotting as colormesh later
+pickle.dump( spikesMatrixE, open( "Espikesmatrix.p", "wb" ) )
+
 # plt.pcolormesh(spikesMatrixE)
 # plt.colorbar()
 # plt.show()
@@ -110,26 +123,28 @@ for n in range(npopE):
 
 
 
+# Save each frame as a file for conversion to animation later
+pickle.dump( frameArray, open( "animFrames.p", "wb" ) )
 
 # make animation
 
-fig = plt.figure()
-ax =  plt.axes(xlim=(0,ncolE), ylim=(0,nrowE))
-ax.grid(True)
-line, = ax.plot([], [], lw=2)
-
-def init():
-    line.set_data([], [])
-    return line
-
-def animate(i):
-    frame = frameArray[i]
-    output = plt.pcolormesh(frame, edgecolors = "#774387")
-    return output
-
-anim = animation.FuncAnimation(fig, animate, interval=100, frames=numberOfFrames)
-
-plt.show()
+# fig = plt.figure()
+# ax =  plt.axes(xlim=(0,ncolE), ylim=(0,nrowE))
+# ax.grid(True)
+# line, = ax.plot([], [], lw=2)
+#
+# def init():
+#     line.set_data([], [])
+#     return line
+#
+# def animate(i):
+#     frame = frameArray[i]
+#     output = plt.pcolormesh(frame, edgecolors = "#774387")
+#     return output
+#
+# anim = animation.FuncAnimation(fig, animate, interval=100, frames=numberOfFrames)
+#
+# plt.show()
 
 
 
