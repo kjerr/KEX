@@ -40,6 +40,7 @@ def lcrn_skewed_gauss(s_id, srow, scol, trow, tcol, ncon, con_std):
     delays = np.abs(radius) / tcol        #Do we model as square matrix?
     return target, delays
 
+
 def perlin_phi(x,y,trow, size, ncon):
     scale = trow/size
     scaled_x = float(x)/float(scale)
