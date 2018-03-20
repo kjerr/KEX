@@ -1,2 +1,1 @@
-# KEX
-Neuronsimulations
+# spiking-activity-dynamics

@@ -9,7 +9,7 @@ import numpy as np
 import noise
 
 __all__ = [
-    'lcrn_skewed_gauss'
+    'lcrn_skewed_gauss',
     'lcrn_gauss_targets',
     'lcrn_gamma_targets',
     'plot_targets',
@@ -23,7 +23,7 @@ def lcrn_skewed_gauss(s_id, srow, scol, trow, tcol, ncon, con_std):
     s_y1 = s_y * grid_scale  # row_id in the new grid
 
     # pick up ncol values for phi and radius
-    tilesinrow = 4;
+    tilesinrow = 4;                                 # sets lowest limit for nrowE, ncolE, nrowI and ncolI
     phi = perlin_phi(s_x1, s_y1, trow, tilesinrow, ncon)
     radius = np.random.normal(0,con_std,size = ncon)
     # print("phi")
@@ -40,11 +40,12 @@ def lcrn_skewed_gauss(s_id, srow, scol, trow, tcol, ncon, con_std):
     delays = np.abs(radius) / tcol        #Do we model as square matrix?
     return target, delays
 
+
 def perlin_phi(x,y,trow, size, ncon):
     scale = trow/size
     scaled_x = float(x)/float(scale)
     scaled_y = float(y)/float(scale)
-    mean = noise.pnoise2(scaled_x, scaled_y, repeatx = size, repeaty = size)
+    mean = 2*np.pi*noise.pnoise2(scaled_x, scaled_y, repeatx = size, repeaty = size)
     return np.random.normal(mean, np.pi / 2, size = ncon)
 
 

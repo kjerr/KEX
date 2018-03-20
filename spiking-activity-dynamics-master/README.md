@@ -1,1 +1,0 @@
-# spiking-activity-dynamics

@@ -39,29 +39,32 @@ def EI_networks(nrowE, ncolE, nrowI, ncolI, p, stdE, stdI, seed=0, **kwargs):
         source = idx, nrowE, ncolE, nrowE, ncolE, numberOfConnections, stdE
         targets, delay = lcrn.lcrn_skewed_gauss(*source)
         targets = targets[targets != idx]           # no selfconnections
-        targets += 1
-        conmatEE.append(tuple(targets))
+        targets += 1                                # target ID's start at 1 and not 0
+        conmatEE.append(targets.tolist())
 
 
         # E-> I
-        source = idx, nrowE, ncolE, nrowI, ncolI, int(p * npopI), stdI
+        numberOfConnections = np.random.binomial(npopI, p)
+        source = idx, nrowE, ncolE, nrowI, ncolI, numberOfConnections, stdI
         targets, delay = lcrn.lcrn_gauss_targets(*source)
         targets += (1 + npopE)
-        conmatEI.append(tuple(targets))
+        conmatEI.append(targets.tolist())
 
     conmatIE, conmatII = [], []
     for idx in range(npopI):
 
         # I-> E
-        source = idx, nrowI, ncolI, nrowE, ncolE, int(p * npopE), stdE
+        numberOfConnections = np.random.binomial(npopE, p)
+        source = idx, nrowI, ncolI, nrowE, ncolE, numberOfConnections, stdE
         targets, delay = lcrn.lcrn_gauss_targets(*source)
         targets += 1
-        conmatIE.append(tuple(targets))
+        conmatIE.append(targets.tolist())
 
         # I-> I
-        source = idx, nrowI, ncolI, nrowI, ncolI, int(p * npopI), stdI
+        numberOfConnections = np.random.binomial(npopI, p)
+        source = idx, nrowI, ncolI, nrowI, ncolI, numberOfConnections, stdI
         targets, delay = lcrn.lcrn_gauss_targets(*source)
         targets += (1 + npopE)
-        conmatII.append(tuple(targets))
+        conmatII.append(targets.tolist())
 
-    return  np.array(conmatEE), np.array(conmatEI), np.array(conmatIE), np.array(conmatII)
+    return [conmatEE, conmatEI, conmatIE, conmatII]
